@@ -12,8 +12,21 @@ Prefer diagrams for:
 - ROS node/topic/service/action relationships.
 - Startup, initialization, callback, loop, and output lifecycle.
 - Error handling or fallback routes when they affect runtime behavior.
+- Any section whose main subject is a flow, including state flow, control flow, callback flow, message flow, queue flow, event flow, or resource lifecycle flow.
 
 Do not create decorative diagrams. Every diagram must help explain how the code runs.
+
+## Flow-First Whiteboard Rule
+
+When the document section is about how something moves, changes, triggers, or propagates, insert a Feishu whiteboard before the supporting table or prose. This applies even if the information could fit in a table.
+
+Use tables after the whiteboard for exact fields, file paths, topic names, state variables, and evidence. Do not leave a data/state/control/callback/call/message flow as table-only unless the user explicitly asks for table-only output or the Feishu whiteboard insertion fails after a simplified retry.
+
+If a Mermaid whiteboard fails to parse, retry once with conservative labels:
+
+- Prefer short plain-text labels.
+- Avoid HTML tags, line breaks, punctuation-heavy labels, and topic names with many symbols inside nodes.
+- Move exact names such as `/cmd_vel`, `object_distance`, or `laser_link -> camera_link` into the surrounding paragraph or table when needed.
 
 ## Diagram Selection
 

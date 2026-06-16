@@ -13,6 +13,8 @@ This skill defines the documentation standard. For actual Feishu operations, use
 
 Explain code by flow, not by file order.
 
+When content involves any kind of flow, such as execution flow, data flow, state flow, control flow, callback flow, call flow, message flow, startup flow, or error-handling flow, represent it with a Feishu whiteboard first. Use tables or prose as supporting detail, not as the only representation.
+
 Prefer:
 
 ```text
@@ -35,7 +37,7 @@ file A summary -> file B summary -> file C summary
 6. Create the main diagram plan from `references/flow-diagram-rules.md`.
 7. Write code evidence and explanations using `references/code-explanation-style.md`.
 8. Create or update the Feishu document with `lark-cli docs --api-version v2`.
-9. Insert or update Feishu whiteboards for core flow diagrams. Keep diagram source in the document when useful.
+9. Insert or update Feishu whiteboards for every important flow section, including data/state/control/callback/call/message flows. Keep diagram source in the document when useful.
 10. Fetch or inspect the created document enough to verify that headings, diagrams, code blocks, tables, and references were inserted correctly.
 
 ## Feishu Output Contract
@@ -46,6 +48,7 @@ The document must include:
 - A reading scope section that lists included and excluded paths.
 - A one-paragraph conclusion explaining responsibility, inputs, outputs, and system position.
 - A main flow whiteboard for execution flow, data flow, or call flow.
+- Feishu whiteboards for any section whose main content is a flow; for example data flow, state flow, control flow, callback flow, message flow, or error-handling flow.
 - An entry-chain section from startup/build configuration to the first business function.
 - A flow-ordered explanation of key code snippets.
 - A table of important functions/classes/configuration files.
