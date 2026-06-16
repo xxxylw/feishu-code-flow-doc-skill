@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lark Code Flow Docs"
+  short_description: "Create Feishu code-flow documentation"
+  default_prompt: "Use $lark-code-flow-doc to create a Feishu document that explains this code path with diagrams and code evidence."

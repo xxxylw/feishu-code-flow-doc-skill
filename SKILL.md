@@ -1,0 +1,84 @@
+---
+name: lark-code-flow-doc
+description: Create Feishu/Lark Docx code-flow documentation with lark-cli. Use when the user wants an AI agent to read a codebase or code path, explain how the code runs, create or update a Feishu document, include Feishu whiteboard diagrams for execution flow/data flow/call flow, and embed correctly tagged code snippets such as cmake, cpp, c, python, bash, xml, yaml, json, or text.
+---
+
+# Lark Code Flow Doc
+
+Use this skill to produce Feishu documents that explain code by runtime flow. The final artifact is a Lark/Feishu Docx document, usually with one or more whiteboards for the main execution flow.
+
+This skill defines the documentation standard. For actual Feishu operations, use the existing `lark-doc` and `lark-whiteboard` skills and follow their required authentication, XML, fetch, update, and whiteboard workflows.
+
+## Core Rule
+
+Explain code by flow, not by file order.
+
+Prefer:
+
+```text
+startup -> build target -> entry function -> initialization -> callback/loop -> output
+```
+
+Avoid:
+
+```text
+file A summary -> file B summary -> file C summary
+```
+
+## Workflow
+
+1. Confirm the requested scope: repository, module, feature, bug path, launch path, or specific files.
+2. Inspect the code with CLI tools before writing: use `rg --files`, `rg`, `git log`, build files, launch scripts, package manifests, and entry-point searches.
+3. Exclude third-party, generated, build, cache, and vendored directories unless the user explicitly targets them.
+4. Identify the runtime path: startup command/script, build declaration, executable target, entry function, core classes/functions, callbacks/loops, and outputs.
+5. Draft the document structure from `references/doc-structure.md`.
+6. Create the main diagram plan from `references/flow-diagram-rules.md`.
+7. Write code evidence and explanations using `references/code-explanation-style.md`.
+8. Create or update the Feishu document with `lark-cli docs --api-version v2`.
+9. Insert or update Feishu whiteboards for core flow diagrams. Keep diagram source in the document when useful.
+10. Fetch or inspect the created document enough to verify that headings, diagrams, code blocks, tables, and references were inserted correctly.
+
+## Feishu Output Contract
+
+The document must include:
+
+- A title that names the module or feature and says it is a code-flow explanation.
+- A reading scope section that lists included and excluded paths.
+- A one-paragraph conclusion explaining responsibility, inputs, outputs, and system position.
+- A main flow whiteboard for execution flow, data flow, or call flow.
+- An entry-chain section from startup/build configuration to the first business function.
+- A flow-ordered explanation of key code snippets.
+- A table of important functions/classes/configuration files.
+- A section for risks, assumptions, and unverified points.
+
+## Evidence Rules
+
+- Cite file paths for every important claim.
+- Prefer function/class names and build target names over vague prose.
+- Include only the smallest code snippet that proves the point.
+- Mark uncertain claims as unverified instead of presenting them as facts.
+- If code cannot be run locally, state that the documentation is based on static CLI inspection.
+
+## Code Block Language Tags
+
+Use accurate code block language tags in Feishu/Markdown content:
+
+| Content | Tag |
+|---|---|
+| CMake | `cmake` |
+| C++ | `cpp` |
+| C | `c` |
+| Python | `python` |
+| Shell scripts or CLI commands | `bash` |
+| XML, launch XML, package manifests | `xml` |
+| YAML configs | `yaml` |
+| JSON configs | `json` |
+| Plain call chains or logs | `text` |
+
+Do not use untagged code fences for source code.
+
+## References
+
+- Read `references/doc-structure.md` before drafting the Feishu document.
+- Read `references/flow-diagram-rules.md` before creating or updating a whiteboard.
+- Read `references/code-explanation-style.md` before writing code snippets and explanations.
