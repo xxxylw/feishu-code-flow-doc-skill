@@ -83,6 +83,16 @@ Use accurate language tags:
 | JSON configs | `json` |
 | Call chains and logs | `text` |
 
+## UTF-8 Write Safety
+
+When writing Feishu Docx content that contains Chinese or other non-ASCII text, prefer a UTF-8 payload file and pass it to `lark-cli` with a relative `@file` path:
+
+```powershell
+lark-cli docs +update --api-version v2 --doc "<doc>" --command append --content "@tmp/payload.xml"
+```
+
+Avoid piping large here-strings from Windows PowerShell into `--content -`; the pipeline can corrupt UTF-8 text into `?` characters. After writing, fetch an outline or keyword fragment that includes representative non-ASCII text and rewrite via UTF-8 `@file` if corruption appears.
+
 ## Install Locally
 
 Install the skill into Codex's local skills directory:

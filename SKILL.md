@@ -36,9 +36,32 @@ file A summary -> file B summary -> file C summary
 5. Draft the document structure from `references/doc-structure.md`.
 6. Create the main diagram plan from `references/flow-diagram-rules.md`.
 7. Write code evidence and explanations using `references/code-explanation-style.md`.
-8. Create or update the Feishu document with `lark-cli docs --api-version v2`.
+8. Create or update the Feishu document with `lark-cli docs --api-version v2`, following the UTF-8 write-safety rules below.
 9. Insert or update Feishu whiteboards for every important flow section, including data/state/control/callback/call/message flows. Keep diagram source in the document when useful.
-10. Fetch or inspect the created document enough to verify that headings, diagrams, code blocks, tables, and references were inserted correctly.
+10. Fetch or inspect the created document enough to verify that headings, diagrams, code blocks, tables, references, and non-ASCII text were inserted correctly.
+
+## UTF-8 Write Safety
+
+When writing XML or Markdown that contains non-ASCII text, especially Chinese, do not rely on a Windows PowerShell pipeline such as `@'...'@ | lark-cli ... --content -`. It can corrupt UTF-8 content into `?` characters before `lark-cli` receives it.
+
+Prefer one of these safe paths:
+
+1. Write the document payload to a UTF-8 file, then pass it by relative `@file` path:
+
+```powershell
+# File must be UTF-8. Path must be relative to the current working directory.
+lark-cli docs +update --api-version v2 --doc "<doc>" --command append --content "@tmp/payload.xml"
+```
+
+2. Use a runtime that guarantees UTF-8 stdin and has the same `lark-cli` auth/config environment as the shell. If that environment is uncertain, fall back to the UTF-8 `@file` path.
+
+After every write, fetch a small outline or keyword fragment that includes representative non-ASCII text:
+
+```powershell
+lark-cli docs +fetch --api-version v2 --doc "<doc>" --scope keyword --keyword "一句话结论|核心流程" --detail with-ids
+```
+
+If the fetched result contains `?` in place of expected non-ASCII text, immediately rewrite the affected content through a UTF-8 `@file` payload and verify again.
 
 ## Feishu Output Contract
 
