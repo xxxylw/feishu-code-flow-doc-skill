@@ -85,6 +85,7 @@ The document must include:
 - Cite file paths for every important claim.
 - Prefer function/class names and build target names over vague prose.
 - Include only the smallest code snippet that proves the point.
+- When inserting a code block, annotate the key lines or small key groups with concise comments that explain what they do in the runtime flow. Also add a short explanation immediately after the code block for why those lines move the flow forward.
 - Mark uncertain claims as unverified instead of presenting them as facts.
 - If code cannot be run locally, state that the documentation is based on static CLI inspection.
 

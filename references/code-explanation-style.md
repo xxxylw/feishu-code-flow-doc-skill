@@ -67,6 +67,28 @@ Keep snippets small:
 - Do not paste whole files.
 - Replace omitted sections with short comments only when needed for readability.
 
+## Key-Line Comments
+
+Do not paste code blocks as unexplained raw code. For every code block, add concise comments on the key lines or small key groups that make the runtime flow understandable.
+
+Use comments to explain flow intent, not syntax:
+
+- Why this task, subscription, callback, queue, message, or state update matters.
+- What data enters and leaves this line or group.
+- Which downstream function, topic, file, hardware output, or API call it triggers.
+
+Avoid commenting every obvious line. A good snippet has a few high-signal comments plus the prose `Explanation` and `Next` sections below it.
+
+Example:
+
+```C++
+ros::Publisher llm_pub =
+    nh.advertise<std_msgs::String>("/llm_request", 10);  // Opens the ASR -> LLM handoff topic.
+
+msg.data = text;      // Carries the finalized ASR sentence.
+llm_pub.publish(msg); // Triggers the LLM node's /llm_request subscriber.
+```
+
 ## Explanation Focus
 
 Explain:
@@ -77,6 +99,8 @@ Explain:
 - Flow transition: what code location or runtime event happens next.
 
 Do not explain obvious syntax. Explain why this code matters to the larger runtime path.
+
+After each code block, explicitly summarize the key commented lines in prose. The prose should answer: what this code receives, what it changes, what it emits, and where the flow continues.
 
 ## Uncertainty Language
 

@@ -13,6 +13,7 @@ This skill is not a generic README generator. It is designed for code-flow docum
 - Start from the real runtime path: startup script, build target, entry function, initialization, callbacks or loops, and outputs.
 - Use Feishu whiteboards for execution flow, data flow, call flow, ROS node relationships, or embedded callback/interrupt flow.
 - Write Feishu Docx content with concise explanations, evidence paths, tables, and correctly tagged code blocks.
+- Add concise comments to key lines inside code blocks, then explain what those lines do in the runtime flow.
 - Mark static-analysis conclusions, assumptions, and unverified runtime behavior clearly.
 
 The core rule:
@@ -46,6 +47,8 @@ Explanation: what it does and why it moves the flow forward.
 Next: where the flow continues.
 ```
 
+Code blocks should not be raw dumps. Add short comments to the key lines or key groups, then explain those comments in prose below the block.
+
 Example:
 
 ````markdown
@@ -54,8 +57,8 @@ Example:
 Evidence: `src/base_control/CMakeLists.txt`
 
 ```cmake
-add_executable(base_control_node src/base_control_node.cpp)
-ament_target_dependencies(base_control_node rclcpp std_msgs)
+add_executable(base_control_node src/base_control_node.cpp) # Creates the runtime node binary.
+ament_target_dependencies(base_control_node rclcpp std_msgs) # Links ROS message/runtime deps.
 ```
 
 Explanation:
