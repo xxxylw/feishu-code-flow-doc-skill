@@ -74,7 +74,7 @@ Use accurate language tags:
 | Content | Tag |
 |---|---|
 | CMake | `cmake` |
-| C++ | `cpp` |
+| C++ | `C++` |
 | C | `c` |
 | Python | `python` |
 | Shell scripts and CLI commands | `bash` |

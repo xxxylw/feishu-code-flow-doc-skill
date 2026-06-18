@@ -49,7 +49,7 @@ It is too vague and does not explain the flow.
 Use:
 
 - `cmake` for `CMakeLists.txt` and `.cmake`.
-- `cpp` for C++ source and headers.
+- `C++` for C++ source and headers.
 - `c` for C source and headers.
 - `python` for Python.
 - `bash` for shell scripts and CLI command blocks.

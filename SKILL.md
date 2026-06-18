@@ -1,6 +1,6 @@
 ---
 name: lark-code-flow-doc
-description: Create Feishu/Lark Docx code-flow documentation with lark-cli. Use when the user wants an AI agent to read a codebase or code path, explain how the code runs, create or update a Feishu document, include Feishu whiteboard diagrams for execution flow/data flow/call flow, and embed correctly tagged code snippets such as cmake, cpp, c, python, bash, xml, yaml, json, or text.
+description: Create Feishu/Lark Docx code-flow documentation with lark-cli. Use when the user wants an AI agent to read a codebase or code path, explain how the code runs, create or update a Feishu document, include Feishu whiteboard diagrams for execution flow/data flow/call flow, and embed correctly tagged code snippets such as cmake, C++, c, python, bash, xml, yaml, json, or text.
 ---
 
 # Lark Code Flow Doc
@@ -95,7 +95,7 @@ Use accurate code block language tags in Feishu/Markdown content:
 | Content | Tag |
 |---|---|
 | CMake | `cmake` |
-| C++ | `cpp` |
+| C++ | `C++` |
 | C | `c` |
 | Python | `python` |
 | Shell scripts or CLI commands | `bash` |
