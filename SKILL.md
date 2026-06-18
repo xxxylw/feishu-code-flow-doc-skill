@@ -15,6 +15,8 @@ Explain code by flow, not by file order.
 
 When content involves any kind of flow, such as execution flow, data flow, state flow, control flow, callback flow, call flow, message flow, startup flow, or error-handling flow, represent it with a Feishu whiteboard first. Use tables or prose as supporting detail, not as the only representation.
 
+Preserve existing Feishu document titles. If `docs +fetch --api-version v2` returns an existing `<title>`, do not update, replace, overwrite, or re-create that title. Write only body blocks after the existing title unless the user explicitly asks to rename the document.
+
 Prefer:
 
 ```text
@@ -36,9 +38,10 @@ file A summary -> file B summary -> file C summary
 5. Draft the document structure from `references/doc-structure.md`.
 6. Create the main diagram plan from `references/flow-diagram-rules.md`.
 7. Write code evidence and explanations using `references/code-explanation-style.md`.
-8. Create or update the Feishu document with `lark-cli docs --api-version v2`, following the UTF-8 write-safety rules below.
-9. Insert or update Feishu whiteboards for every important flow section, including data/state/control/callback/call/message flows. Keep diagram source in the document when useful.
-10. Fetch or inspect the created document enough to verify that headings, diagrams, code blocks, tables, references, and non-ASCII text were inserted correctly.
+8. Before updating an existing Feishu document, fetch it with `docs +fetch --api-version v2` and check for `<title>`. If a title exists, preserve it and omit `<title>` from update payloads; prefer `append` or `block_insert_after` body updates over `overwrite`.
+9. Create or update the Feishu document with `lark-cli docs --api-version v2`, following the UTF-8 write-safety rules below.
+10. Insert or update Feishu whiteboards for every important flow section, including data/state/control/callback/call/message flows. Keep diagram source in the document when useful.
+11. Fetch or inspect the created document enough to verify that the original title is unchanged, headings, diagrams, code blocks, tables, references, and non-ASCII text were inserted correctly.
 
 ## UTF-8 Write Safety
 
@@ -67,7 +70,7 @@ If the fetched result contains `?` in place of expected non-ASCII text, immediat
 
 The document must include:
 
-- A title that names the module or feature and says it is a code-flow explanation.
+- A title that names the module or feature and says it is a code-flow explanation when creating a new document. For an existing Feishu document, preserve the existing title exactly unless the user explicitly requests a rename.
 - A reading scope section that lists included and excluded paths.
 - A one-paragraph conclusion explaining responsibility, inputs, outputs, and system position.
 - A main flow whiteboard for execution flow, data flow, or call flow.

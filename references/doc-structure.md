@@ -4,7 +4,7 @@ Use this structure for the Feishu Docx document. Adapt section names to the user
 
 ## Title
 
-Use:
+When creating a new Feishu document, use:
 
 ```text
 <module-or-feature-name> 代码流程说明
@@ -15,6 +15,8 @@ For English projects, use:
 ```text
 <module-or-feature-name> Code Flow Explanation
 ```
+
+When updating an existing Feishu document, first fetch it. If the document already has a `<title>`, preserve that title exactly. Do not include a new `<title>` in append, block insert, or block replace payloads, and do not use `overwrite` merely to rebuild the body. Add the code-flow explanation as body content under the existing title unless the user explicitly asks to rename the document.
 
 ## Required Sections
 
