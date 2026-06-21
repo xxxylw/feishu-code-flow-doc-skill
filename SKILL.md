@@ -1,114 +1,175 @@
 ---
-name: lark-code-flow-doc
-description: Create Feishu/Lark Docx code-flow documentation with lark-cli. Use when the user wants an AI agent to read a codebase or code path, explain how the code runs, create or update a Feishu document, include Feishu whiteboard diagrams for execution flow/data flow/call flow, and embed correctly tagged code snippets such as cmake, C++, c, python, bash, xml, yaml, json, or text.
+name: feishu-doc
+description: Compose Feishu/Lark Docx documents from a chat conversation. Use when the user asks to summarize, write up, or push the recent discussion to Feishu — covers code-flow explanations, build records, training journals, study notes with math, and tech-decision memos. Auto-selects from a fixed set of bricks based on conversation content. Calls lark-doc / lark-whiteboard for actual API operations.
 ---
 
-# Lark Code Flow Doc
+# Feishu Doc
 
-Use this skill to produce Feishu documents that explain code by runtime flow. The final artifact is a Lark/Feishu Docx document, usually with one or more whiteboards for the main execution flow.
+Compose a Feishu Docx document from the current conversation. When the user says "把刚才讨论的总结到飞书文档", the skill reviews the conversation, auto-selects bricks, assembles them, and writes the result via lark-cli.
 
-This skill defines the documentation standard. For actual Feishu operations, use the existing `lark-doc` and `lark-whiteboard` skills and follow their required authentication, XML, fetch, update, and whiteboard workflows.
+**Core idea**: brick-based, not template-based. No fixed section structure — the document shape is driven by what the conversation actually contains.
 
-## Core Rule
+---
 
+## Trigger Rules
+
+### Explicit trigger
+
+The user message contains one of:
+- "总结到飞书", "写到飞书", "写飞书文档", "飞书文档总结"
+- "把刚才/刚刚/前面的（讨论/工作/内容）写文档"
+- "更新飞书文档 `<doc-id>`", "追加到飞书文档 `<doc-id>`"
+- "summarize to feishu", "write a feishu doc"
+
+### Implicit trigger
+
+Requires a prior explicit agreement in the session that the Feishu document is the target artifact, AND the conversation contains a solidifiable result (code / command / decision / formula). Without prior agreement, do not implicitly trigger.
+
+### Do not trigger
+
+- User is asking a concept ("what is X")
+- Conversation is still exploratory, no solidifiable conclusion
+- User specified a non-Feishu output ("write README", "put in spreadsheet")
+- User is requesting an operation ("run it", "debug this")
+
+---
+
+## Brick List (11)
+
+| # | Brick | Trigger feature |
+|---|-------|-----------------|
+| 1 | Metadata header | Hardware / paths / project name / date present (≥2) |
+| 2 | One-line conclusion | **Always** |
+| 3 | Flow whiteboard | Execution / data / call / state / control flow, or architecture relationships |
+| 4 | Step log | Reproducible operation sequence with commands, config changes, or UI paths |
+| 5 | Decision table | Choice between options / parameter selection / version switch |
+| 6 | Code evidence | Source code references (file path / function / class name) |
+| 7 | Math derivation | Formulas / loss / gradients / probability / algorithm proofs |
+| 8 | Comparison table | Multi-object comparison (descriptive, not selection) |
+| 9 | Version baseline | Environment / dependency versions |
+| 10 | Risks & unverified | Inferences / assumptions / unverified claims / missing dependencies |
+| 11 | Action items | Next steps with owners and acceptance criteria |
+
+Full specifications in [`references/doc-bricks.md`](references/doc-bricks.md).
+
+---
+
+## Brick Selection Logic
+
+Scan the conversation for content features. Each hit independently adds a brick. All are stackable:
+
+```
+References file/function/class?           → +Code evidence
+Reproducible command/config/UI sequence?  → +Step log
+"Choose X over Y / change A to B"?        → +Decision table
+Formula / loss / gradient / derivation?   → +Math derivation
+Execution/data/call flow or architecture? → +Flow whiteboard
+CUDA/Python/package versions?             → +Version baseline
+Multi-object comparison (not selection)?  → +Comparison table
+Inference / unverified / assumption?      → +Risks & unverified
+Next steps with owner/deadline?           → +Action items
+Hardware/path/project/date (≥2)?          → +Metadata header
+(always)                                  → +One-line conclusion
+```
+
+**Feature-driven, not scenario-driven**: only check whether the conversation contains the corresponding feature. The same "training record" may or may not contain math depending on actual content.
+
+**Fallback**: if nothing hits besides "One-line conclusion", the conversation is insufficient to summarize. Return to the user and suggest a more specific output.
+
+**Complexity guard**: a typical document should have the one-line conclusion plus a few core bricks plus supporting bricks. If nearly every brick hits, the conversation is likely too broad — consider splitting into multiple documents, or ask the user to scope it down.
+
+---
+
+## Assembly Order
+
+Fixed pyramid order:
+
+```
+1. Metadata header (if hit)
+2. One-line conclusion (always)
+3. Flow whiteboard (if hit; placed early to anchor the reader's mental model)
+4. Core bricks (in the conversation's logical order):
+   Decision table / Step log / Code evidence / Math derivation
+5. Reference bricks (static reference data):
+   Version baseline / Comparison table
+6. Action items (if hit)
+7. Risks & unverified (if hit, always last)
+```
+
+The relative order of core bricks follows the conversation's logical flow:
+- Study notes: math derivation → code implementation
+- Build records: decision table → step log
+- Code flow: flow whiteboard → code evidence (in runtime order)
+
+---
+
+## Scenario Recipes
+
+Typical brick combinations for common scenarios. These provide weighted confirmation of the selection result. Not mandatory templates.
+
+| Scenario | Keywords | Brick combination |
+|----------|----------|-------------------|
+| Code flow doc | "explain how code runs" | Header + conclusion + whiteboard + code evidence (runtime order) + risks |
+| Build record | "record setup" | Header + conclusion + whiteboard (if complex) + decision table + step log + version baseline + risks |
+| Study notes | "study notes" "summarize paper" | Conclusion + math derivation + code evidence (if any) + whiteboard (if complex) + risks |
+| Tech decision | "decision discussion" | Conclusion + decision table + whiteboard (architecture) + comparison table + action items + risks |
+| Meeting notes | "meeting summary" | Conclusion + decision table + action items + risks |
+| Troubleshooting | "debug recap" "postmortem" | Conclusion + step log + code evidence (error location) + decision table (fix candidates) + risks |
+
+Details in [`references/scenario-recipes.md`](references/scenario-recipes.md).
+
+---
+
+## Preserved Capability: Code Flow Documents
+
+When the conversation is about code, the skill follows the original core principle from `lark-code-flow-doc`:
+
+```
 Explain code by flow, not by file order.
-
-When content involves any kind of flow, such as execution flow, data flow, state flow, control flow, callback flow, call flow, message flow, startup flow, or error-handling flow, represent it with a Feishu whiteboard first. Use tables or prose as supporting detail, not as the only representation.
-
-Preserve existing Feishu document titles. If `docs +fetch --api-version v2` returns an existing `<title>`, do not update, replace, overwrite, or re-create that title. Write only body blocks after the existing title unless the user explicitly asks to rename the document.
-
-Prefer:
-
-```text
-startup -> build target -> entry function -> initialization -> callback/loop -> output
 ```
 
-Avoid:
+Organize by runtime path, not by file order:
 
-```text
-file A summary -> file B summary -> file C summary
 ```
+startup → build target → entry function → initialization → callback/loop → output
+```
+
+The whiteboard must come before code evidence to give the reader the global view first. Code evidence follows in runtime order, each segment with file:symbol + Next pointer. See "Code flow" recipe in `references/scenario-recipes.md` for the full preserved structure.
+
+---
+
+## Downstream Skill Collaboration
+
+This skill only defines "what to write and how to organize". Feishu API calls use existing skills:
+
+- **Create/update document**: `lark-doc` skill, `docs +create` / `docs +update --api-version v2`
+- **Create/update whiteboard**: `lark-whiteboard` skill
+- **Existing title protection**: after fetch, if a `<title>` exists, do not overwrite — only append body content
+- **UTF-8 write safety**: for non-ASCII content, always use `@file` relative path, never PowerShell pipe
+
+Feishu XML syntax and command reference in [`references/feishu-elements.md`](references/feishu-elements.md).
+
+---
 
 ## Workflow
 
-1. Confirm the requested scope: repository, module, feature, bug path, launch path, or specific files.
-2. Inspect the code with CLI tools before writing: use `rg --files`, `rg`, `git log`, build files, launch scripts, package manifests, and entry-point searches.
-3. Exclude third-party, generated, build, cache, and vendored directories unless the user explicitly targets them.
-4. Identify the runtime path: startup command/script, build declaration, executable target, entry function, core classes/functions, callbacks/loops, and outputs.
-5. Draft the document structure from `references/doc-structure.md`.
-6. Create the main diagram plan from `references/flow-diagram-rules.md`.
-7. Write code evidence and explanations using `references/code-explanation-style.md`.
-8. Before updating an existing Feishu document, fetch it with `docs +fetch --api-version v2` and check for `<title>`. If a title exists, preserve it and omit `<title>` from update payloads; prefer `append` or `block_insert_after` body updates over `overwrite`.
-9. Create or update the Feishu document with `lark-cli docs --api-version v2`, following the UTF-8 write-safety rules below.
-10. Insert or update Feishu whiteboards for every important flow section, including data/state/control/callback/call/message flows. Keep diagram source in the document when useful.
-11. Fetch or inspect the created document enough to verify that the original title is unchanged, headings, diagrams, code blocks, tables, references, and non-ASCII text were inserted correctly.
+1. **Check trigger**: apply trigger rules; if not triggered, stop
+2. **Review conversation**: scan content features, determine which bricks hit
+3. **Select bricks**: stack bricks per the feature checklist
+4. **Order**: arrange bricks per assembly order
+5. **Read references**: for hit bricks, read the corresponding section in `doc-bricks.md`; for whiteboards, read `whiteboard-rules.md`; check `style-guide.md` for style
+6. **Generate XML**: use correct syntax from `feishu-elements.md`
+7. **Write to Feishu**: create or update the document via lark-cli
+8. **Verify**: fetch written fragments, check title, whiteboard, code blocks, tables, and CJK text are correct
 
-## UTF-8 Write Safety
+---
 
-When writing XML or Markdown that contains non-ASCII text, especially Chinese, do not rely on a Windows PowerShell pipeline such as `@'...'@ | lark-cli ... --content -`. It can corrupt UTF-8 content into `?` characters before `lark-cli` receives it.
+## References Index
 
-Prefer one of these safe paths:
-
-1. Write the document payload to a UTF-8 file, then pass it by relative `@file` path:
-
-```powershell
-# File must be UTF-8. Path must be relative to the current working directory.
-lark-cli docs +update --api-version v2 --doc "<doc>" --command append --content "@tmp/payload.xml"
-```
-
-2. Use a runtime that guarantees UTF-8 stdin and has the same `lark-cli` auth/config environment as the shell. If that environment is uncertain, fall back to the UTF-8 `@file` path.
-
-After every write, fetch a small outline or keyword fragment that includes representative non-ASCII text:
-
-```powershell
-lark-cli docs +fetch --api-version v2 --doc "<doc>" --scope keyword --keyword "一句话结论|核心流程" --detail with-ids
-```
-
-If the fetched result contains `?` in place of expected non-ASCII text, immediately rewrite the affected content through a UTF-8 `@file` payload and verify again.
-
-## Feishu Output Contract
-
-The document must include:
-
-- A title that names the module or feature and says it is a code-flow explanation when creating a new document. For an existing Feishu document, preserve the existing title exactly unless the user explicitly requests a rename.
-- A reading scope section that lists included and excluded paths.
-- A one-paragraph conclusion explaining responsibility, inputs, outputs, and system position.
-- A main flow whiteboard for execution flow, data flow, or call flow.
-- Feishu whiteboards for any section whose main content is a flow; for example data flow, state flow, control flow, callback flow, message flow, or error-handling flow.
-- An entry-chain section from startup/build configuration to the first business function.
-- A flow-ordered explanation of key code snippets.
-- A table of important functions/classes/configuration files.
-- A section for risks, assumptions, and unverified points.
-
-## Evidence Rules
-
-- Cite file paths for every important claim.
-- Prefer function/class names and build target names over vague prose.
-- Include only the smallest code snippet that proves the point.
-- When inserting a code block, annotate the key lines or small key groups with concise comments that explain what they do in the runtime flow. Also add a short explanation immediately after the code block for why those lines move the flow forward.
-- Mark uncertain claims as unverified instead of presenting them as facts.
-- If code cannot be run locally, state that the documentation is based on static CLI inspection.
-
-## Code Block Language Tags
-
-Use accurate code block language tags in Feishu/Markdown content:
-
-| Content | Tag |
-|---|---|
-| CMake | `cmake` |
-| C++ | `C++` |
-| C | `c` |
-| Python | `python` |
-| Shell scripts or CLI commands | `bash` |
-| XML, launch XML, package manifests | `xml` |
-| YAML configs | `yaml` |
-| JSON configs | `json` |
-| Plain call chains or logs | `text` |
-
-Do not use untagged code fences for source code.
-
-## References
-
-- Read `references/doc-structure.md` before drafting the Feishu document.
-- Read `references/flow-diagram-rules.md` before creating or updating a whiteboard.
-- Read `references/code-explanation-style.md` before writing code snippets and explanations.
+| File | Responsibility |
+|------|----------------|
+| [`references/doc-bricks.md`](references/doc-bricks.md) | Full specifications for all 11 bricks (trigger / content / Feishu element / good-bad examples) |
+| [`references/whiteboard-rules.md`](references/whiteboard-rules.md) | Whiteboard strategy (three-tier judgement + type selection + fallback path) |
+| [`references/style-guide.md`](references/style-guide.md) | Style rules (syntax / anti-patterns / callout discipline / CJK-English mixing) |
+| [`references/scenario-recipes.md`](references/scenario-recipes.md) | Scenario recipes (typical brick combinations) |
+| [`references/feishu-elements.md`](references/feishu-elements.md) | Feishu XML reference + UTF-8 write safety |

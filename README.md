@@ -1,135 +1,119 @@
-# Lark Code Flow Docs
+# Feishu Doc Skill
 
-![Lark Code Flow Docs hero](assets/lark-code-flow-docs-hero.png)
+![Feishu Doc Skill hero](assets/lark-code-flow-docs-hero.png)
 
-`lark-code-flow-doc` is a Codex skill for creating Feishu/Lark Docx documents that explain how code runs.
+A skill for composing Feishu/Lark Docx documents from chat conversations. It guides an AI agent to review the current conversation, auto-select document "bricks" based on content features, assemble them, and write the result to Feishu via `lark-cli`.
 
-It guides an AI agent to inspect a codebase with CLI tools, trace the runtime flow, create Feishu whiteboard diagrams, and write a flow-first code explanation with precise code evidence.
+## What This Skill Does
 
-## What This Skill Focuses On
+User says "把刚才讨论的总结到飞书文档" (summarize our discussion to a Feishu doc). The skill:
 
-This skill is not a generic README generator. It is designed for code-flow documentation:
+1. Reviews the conversation content
+2. Scans for content features (code, commands, decisions, formulas, flows, version info)
+3. Selects matching bricks from a fixed set of 11
+4. Assembles bricks in a stable reading order
+5. Writes the document via `lark-cli docs --api-version v2`
 
-- Start from the real runtime path: startup script, build target, entry function, initialization, callbacks or loops, and outputs.
-- Use Feishu whiteboards for execution flow, data flow, call flow, ROS node relationships, or embedded callback/interrupt flow.
-- Write Feishu Docx content with concise explanations, evidence paths, tables, and correctly tagged code blocks.
-- Add concise comments to key lines inside code blocks, then explain what those lines do in the runtime flow.
-- Mark static-analysis conclusions, assumptions, and unverified runtime behavior clearly.
+**Core idea**: brick-based, not template-based. No fixed section structure — the document shape is driven by what the conversation actually contains.
 
-The core rule:
+## Brick System
+
+The skill auto-selects from 11 bricks based on conversation features:
+
+| Brick | Triggers when conversation has |
+|-------|-------------------------------|
+| Metadata header | Hardware / paths / project name / date (≥2) |
+| One-line conclusion | Always |
+| Flow whiteboard | Execution / data / call / state / control flow |
+| Step log | Reproducible command/config/UI sequences |
+| Decision table | Choice between options / parameter selection |
+| Code evidence | Source code references (file:symbol) |
+| Math derivation | Formulas / loss / gradients / proofs |
+| Comparison table | Multi-object comparison (descriptive, not selection) |
+| Version baseline | Environment / dependency versions |
+| Risks & unverified | Inferences / assumptions / unverified claims |
+| Action items | Next steps with owners and acceptance criteria |
+
+See `references/doc-bricks.md` for full brick specifications.
+
+## Preserved Capability: Code Flow Documents
+
+The original `lark-code-flow-doc` behavior is preserved as one scenario recipe. When the conversation is about code, the skill follows the original core rule:
 
 ```text
 Explain code by flow, not by file order.
 ```
 
-## Document Shape
+Startup → build target → entry function → initialization → callback/loop → output.
 
-A generated Feishu document should usually contain:
+The full preserved structure (reading scope, entry chain, data/state flow, key symbols table) is documented in the "Code flow" recipe in `references/scenario-recipes.md`.
 
-1. Reading scope: included paths, excluded vendor/generated/build paths, and inspection method.
-2. One-paragraph conclusion: responsibility, system position, input, output, and verification status.
-3. Main flow whiteboard: the diagram that explains how the code runs.
-4. Entry chain: startup command or script, build declaration, executable target, main function, and first business call.
-5. Core code flow: step-by-step code evidence in execution order.
-6. Data or state flow: where data comes from, how it changes, and where it goes.
-7. Key symbols table: important classes, functions, config files, and their roles.
-8. Risks and unverified points: hardware, credentials, models, environment, or branches not confirmed.
+## Scenario Recipes
 
-## Code Explanation Style
+Typical brick combinations for common scenarios:
 
-Each important code snippet should answer:
+| Scenario | Keywords | Bricks |
+|----------|----------|--------|
+| Code flow | "explain how code runs" | Header + conclusion + whiteboard + code evidence + risks |
+| Build record | "record setup" | Header + conclusion + decision table + step log + version baseline + risks |
+| Training journal | "training record" | Header + conclusion + decision table + step log + comparison table + version baseline + risks |
+| Study notes | "study notes" "summarize paper" | Conclusion + math derivation + code evidence + whiteboard + risks |
+| Tech decision | "decision discussion" | Conclusion + decision table + whiteboard + comparison table + action items + risks |
+| Meeting notes | "meeting summary" | Conclusion + decision table + action items + risks |
+| Troubleshooting | "debug recap" "postmortem" | Conclusion + step log + code evidence + decision table + risks + action items |
 
-```text
-Flow position: where this code sits in the runtime path.
-Evidence: file path and symbol.
-Code: minimal snippet with correct language tag.
-Explanation: what it does and why it moves the flow forward.
-Next: where the flow continues.
-```
-
-Code blocks should not be raw dumps. Add short comments to the key lines or key groups, then explain those comments in prose below the block.
-
-Example:
-
-````markdown
-### Step 2: CMake defines the executable target
-
-Evidence: `src/base_control/CMakeLists.txt`
-
-```cmake
-add_executable(base_control_node src/base_control_node.cpp) # Creates the runtime node binary.
-ament_target_dependencies(base_control_node rclcpp std_msgs) # Links ROS message/runtime deps.
-```
-
-Explanation:
-
-This declares `base_control_node` as the executable target. Later launch or startup commands run this target, so this CMake block connects the build configuration to the runtime entry.
-
-Next:
-
-Trace `src/base_control_node.cpp::main`.
-````
-
-## Code Block Tags
-
-Use accurate language tags:
-
-| Content | Tag |
-|---|---|
-| CMake | `cmake` |
-| C++ | `C++` |
-| C | `c` |
-| Python | `python` |
-| Shell scripts and CLI commands | `bash` |
-| XML, launch XML, package manifests | `xml` |
-| YAML configs | `yaml` |
-| JSON configs | `json` |
-| Call chains and logs | `text` |
+See `references/scenario-recipes.md` for details.
 
 ## UTF-8 Write Safety
 
-When writing Feishu Docx content that contains Chinese or other non-ASCII text, prefer a UTF-8 payload file and pass it to `lark-cli` with a relative `@file` path:
+For any content with non-ASCII text, write to a UTF-8 file and pass it by relative `@file` path:
 
-```powershell
+```bash
 lark-cli docs +update --api-version v2 --doc "<doc>" --command append --content "@tmp/payload.xml"
 ```
 
-Avoid piping large here-strings from Windows PowerShell into `--content -`; the pipeline can corrupt UTF-8 text into `?` characters. After writing, fetch an outline or keyword fragment that includes representative non-ASCII text and rewrite via UTF-8 `@file` if corruption appears.
+Do not pipe through PowerShell — it corrupts UTF-8 to `?`. After writing, fetch a fragment and verify. Inline `--content` is for ASCII-only debugging only.
+
+## Repository Contents
+
+```
+SKILL.md                     ← Entry: trigger rules + brick selection + assembly order
+references/
+  doc-bricks.md              ← 11 brick specifications
+  whiteboard-rules.md        ← Whiteboard strategy (when to draw, type selection, fallback)
+  style-guide.md             ← Writing style (anti-patterns, callout discipline, language)
+  scenario-recipes.md        ← Typical brick combinations per scenario
+  feishu-elements.md         ← Feishu XML reference + UTF-8 write safety
+agents/
+  openai.yaml                ← Codex UI metadata
+```
 
 ## Install Locally
 
-Install the skill into Codex's local skills directory:
-
-```powershell
+```bash
 git clone https://github.com/xxxylw/feishu-code-flow-doc-skill.git
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.codex\skills\lark-code-flow-doc"
-Copy-Item -Recurse -Force .\feishu-code-flow-doc-skill\SKILL.md, .\feishu-code-flow-doc-skill\agents, .\feishu-code-flow-doc-skill\references "$env:USERPROFILE\.codex\skills\lark-code-flow-doc\"
 ```
 
-Restart Codex after installing so the skill is discovered.
+Copy `SKILL.md` and `references/` into your AI agent's skills directory (e.g. `~/.codex/skills/feishu-doc/`).
 
 ## Example Prompts
 
 ```text
-Use $lark-code-flow-doc to analyze the MCU startup flow and create a Feishu document with a whiteboard diagram.
+Summarize our discussion into a Feishu document.
 ```
 
 ```text
-Use $lark-code-flow-doc to explain how this ROS node starts, subscribes, processes data, and publishes output. Write it into a Feishu document.
+把刚才讨论的总结到飞书文档。
 ```
 
 ```text
-Use $lark-code-flow-doc to document this code path. Focus on the runtime flow, code evidence, and unverified assumptions.
+Use this skill to explain how this ROS node starts, subscribes, processes data, and publishes output. Write it into a Feishu document with a whiteboard.
 ```
 
-## Repository Contents
-
-- `SKILL.md`: skill trigger and main workflow.
-- `references/doc-structure.md`: Feishu document structure.
-- `references/flow-diagram-rules.md`: whiteboard and diagram rules.
-- `references/code-explanation-style.md`: code snippet and explanation style.
-- `agents/openai.yaml`: Codex UI metadata.
+```text
+Use this skill to document this training run — hyperparameter choices, commands, results, and risks.
+```
 
 ## Notes
 
-This skill defines the documentation standard. Actual Feishu operations rely on the existing `lark-doc` and `lark-whiteboard` skills plus `lark-cli`.
+This skill defines the documentation standard (what to write and how to organize). Actual Feishu API operations rely on the existing `lark-doc` and `lark-whiteboard` skills plus `lark-cli`.
