@@ -69,9 +69,9 @@ Bad (preamble + academic tone + no numbers):
 
 Whether a whiteboard is actually needed is judged by the rules in `whiteboard-rules.md`, not just by hitting this brick.
 
-**Feishu element**: whiteboard block. Type selection and fallback path in `whiteboard-rules.md`.
+**Feishu element**: whiteboard block. Type selection and color scheme in `whiteboard-rules.md`.
 
-Good:
+Good (mermaid — simple flow, no color needed):
 ```xml
 <whiteboard type="mermaid">
 flowchart TD
@@ -81,6 +81,30 @@ flowchart TD
   D --> E["initialize"]
   E --> F["callback/loop"]
   F --> G["output result"]
+</whiteboard>
+```
+
+Good (SVG — colored diagram using One Dark palette):
+```xml
+<whiteboard type="svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 70">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#56b6c2"/>
+    </marker>
+  </defs>
+  <rect x="10" y="13" width="120" height="44" rx="6" fill="#212337" stroke="#61afef" stroke-width="2"/>
+  <text x="70" y="40" text-anchor="middle" fill="#abb2bf" font-size="13" font-family="sans-serif">load data</text>
+  <line x1="130" y1="35" x2="166" y2="35" stroke="#56b6c2" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="170" y="13" width="120" height="44" rx="6" fill="#1a2e29" stroke="#98c379" stroke-width="2"/>
+  <text x="230" y="40" text-anchor="middle" fill="#abb2bf" font-size="13" font-family="sans-serif">train</text>
+  <line x1="290" y1="35" x2="326" y2="35" stroke="#56b6c2" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="330" y="13" width="120" height="44" rx="6" fill="#2e2918" stroke="#e5c07b" stroke-width="2"/>
+  <text x="390" y="40" text-anchor="middle" fill="#abb2bf" font-size="13" font-family="sans-serif">eval</text>
+  <line x1="450" y1="35" x2="486" y2="35" stroke="#56b6c2" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="490" y="13" width="120" height="44" rx="6" fill="#212337" stroke="#61afef" stroke-width="2"/>
+  <text x="550" y="40" text-anchor="middle" fill="#abb2bf" font-size="13" font-family="sans-serif">save model</text>
+</svg>
 </whiteboard>
 ```
 

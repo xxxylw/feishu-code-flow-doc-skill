@@ -123,19 +123,76 @@ Do not retry indefinitely. Two failures → degrade.
 
 ## Creating Whiteboards in Feishu
 
-**Simple diagrams** (flowchart, sequence, state — can be expressed in a single Mermaid block): embed directly:
+### Diagram type routing
+
+| Diagram type | Recommended path | Why |
+|-------------|-----------------|-----|
+| Flowchart (no color needed) | `mermaid` inline | Fastest, one step, readable |
+| Flowchart (color needed) | `svg` inline | Full color control with One Dark palette |
+| Architecture diagram | `svg` inline | Precise layout + custom colors |
+| Sequence / state / class / pie | `mermaid` inline | Mermaid handles these well, no color needed |
+| Mind map | `mermaid` inline | Mermaid handles these well |
+| Bar/line/funnel/pyramid | `svg` inline | Mermaid cannot express these shapes |
+
+### Whiteboard type reference
+
+| type | How to write | Color control | Steps | Use when |
+|------|-------------|---------------|-------|----------|
+| `mermaid` | Inline mermaid syntax in document XML | ❌ Feishu ignores classDef/linkStyle | 1 (inline) | Simple diagrams that do not need custom colors |
+| `svg` | Inline complete self-contained SVG in document XML | ✅ Full control over all colors/styles/layout | 1 (inline) | **Default for colored diagrams** — moderate to high complexity |
+| `plantuml` | Inline PlantUML in document XML | ⚠️ Partial (skinparam), but Feishu parse often fails | 1 (inline) | Not recommended — high parse-failure rate on Feishu |
+| `blank` | Insert empty whiteboard, then write via lark-whiteboard skill | ✅ Via raw node JSON | 2 (insert + API write) | Only when editable Feishu-native nodes are required |
+
+**Color control reality check** (tested 2026-06-22): Feishu's mermaid renderer silently strips all custom styling (`classDef`, `linkStyle`, `fill`, `stroke`). If color matters, use `svg`. PlantUML inline content triggers `degrade_code=2107` (parse failure) and renders as an empty whiteboard on current Feishu.
+
+---
+
+## SVG Color Scheme (One Dark)
+
+All SVG whiteboards use a single fixed palette derived from the One Dark color scheme. This ensures visual consistency across all diagrams and avoids ad-hoc color choices.
+
+### Semantic roles
+
+| Role | Fill | Border | Use for |
+|------|------|--------|---------|
+| I/O node | `#212337` | `#61afef` | Data input/output: load dataset, save model, publish, write file |
+| Process node | `#1a2e29` | `#98c379` | Computation: train, preprocess, transform, build |
+| Check node | `#2e2918` | `#e5c07b` | Evaluation/decision: eval, validate, gate, branch |
+| Highlight node | `#2a1f24` | `#e06c75` | Emphasis: error path, critical warning, the node the reader must not miss |
+| External node | `#1e2233` | `#56b6c2` | Third-party/external: API call, external service, pre-trained model |
+| Arrows / connectors | — | `#56b6c2` | All directed edges |
+| Text | — | `#abb2bf` | All node labels and edge labels |
+
+### SVG template
+
+Every SVG whiteboard must follow this structure:
 
 ```xml
-<whiteboard type="mermaid">
-flowchart TD
-  A["startup script"] --> B["load config"]
-  B --> C["entry function"]
-  C --> D["output result"]
+<whiteboard type="svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 WIDTH HEIGHT">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#56b6c2"/>
+    </marker>
+  </defs>
+  <!-- I/O node -->
+  <rect x="10" y="13" width="120" height="44" rx="6" fill="#212337" stroke="#61afef" stroke-width="2"/>
+  <text x="70" y="40" text-anchor="middle" fill="#abb2bf" font-size="13" font-family="sans-serif">load data</text>
+  <line x1="130" y1="35" x2="166" y2="35" stroke="#56b6c2" stroke-width="2" marker-end="url(#arr)"/>
+  <!-- Process node -->
+  <rect x="170" y="13" width="120" height="44" rx="6" fill="#1a2e29" stroke="#98c379" stroke-width="2"/>
+  <text x="230" y="40" text-anchor="middle" fill="#abb2bf" font-size="13" font-family="sans-serif">train</text>
+</svg>
 </whiteboard>
 ```
 
-**Complex diagrams** (require precise node/edge placement, multi-region layouts, custom icons — beyond what a single Mermaid block can express):
-1. Insert `<whiteboard type="blank"></whiteboard>` to create an empty whiteboard
-2. Call the `lark-whiteboard` skill to write content into it
+### SVG construction rules
 
-After creation, place the whiteboard block in the document body + a one-paragraph read guide + a mapping table.
+- Fully self-contained: inline all `defs`, `marker`, `gradient` — no external references
+- Define `viewBox` so the diagram scales correctly in Feishu
+- Use standard SVG elements only (`rect`, `text`, `line`, `path`, `circle`, `polygon`, `ellipse`)
+- Rounded rectangles (`rx="6"`) for all nodes — consistent shape language
+- Arrow markers: define once in `<defs>`, reference via `marker-end="url(#arr)"`
+- Node width/height should accommodate the longest label in the diagram
+- Text: `text-anchor="middle"` centered, `dominant-baseline` not required if y-coordinate is set to visual center
+- Do not invent colors outside the palette above. If a new semantic role is needed, add it here with a name + fill + border pair, do not use ad-hoc hex values in diagrams.

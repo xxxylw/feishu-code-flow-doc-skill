@@ -172,7 +172,7 @@ Feishu XML syntax and command reference in [`references/feishu-elements.md`](ref
 2. **Review conversation**: scan content features, determine which bricks hit
 3. **Select bricks**: stack bricks per the feature checklist
 4. **Order**: arrange bricks per assembly order
-5. **Read references**: for hit bricks, read the corresponding section in `doc-bricks.md`; for whiteboards, read `whiteboard-rules.md`; check `style-guide.md` for style (including § Worked Examples if the document traces a numerical calculation)
+5. **Read references**: for hit bricks, read the corresponding section in `doc-bricks.md`; for whiteboards, read `whiteboard-rules.md`; check `style-guide.md` for style rules
 6. **Generate XML**: use correct syntax from `feishu-elements.md`
 7. **Write to Feishu**: create or update the document via lark-cli
 8. **Verify**: fetch written fragments, check title, whiteboard, code blocks, tables, and CJK text are correct
@@ -183,8 +183,8 @@ Feishu XML syntax and command reference in [`references/feishu-elements.md`](ref
 
 | File | Responsibility |
 |------|----------------|
-| [`references/doc-bricks.md`](references/doc-bricks.md) | Full specifications for all 11 bricks (trigger / content / Feishu element / good-bad examples) |
-| [`references/whiteboard-rules.md`](references/whiteboard-rules.md) | Whiteboard strategy (three-tier judgement + type selection + fallback path) |
+| [`references/doc-bricks.md`](references/doc-bricks.md) | Full specifications for all 12 bricks (trigger / content / Feishu element / good-bad examples) |
+| [`references/whiteboard-rules.md`](references/whiteboard-rules.md) | Whiteboard strategy (three-tier judgement + type selection + SVG One Dark color scheme) |
 | [`references/style-guide.md`](references/style-guide.md) | Style rules (syntax / anti-patterns / callout discipline / CJK-English mixing / worked examples) |
 | [`references/scenario-recipes.md`](references/scenario-recipes.md) | Scenario recipes (typical brick combinations) |
 | [`references/feishu-elements.md`](references/feishu-elements.md) | Feishu XML reference + UTF-8 write safety |

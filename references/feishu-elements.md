@@ -120,15 +120,25 @@ Block-level: wrap each formula in its own `<p>`, bridge with prose between formu
 ## whiteboard
 
 ```xml
-<whiteboard type="mermaid">
-flowchart TD
-  A["start"] --> B["load"] --> C["output"]
+<whiteboard type="svg">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 70">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#56b6c2"/>
+    </marker>
+  </defs>
+  <rect x="10" y="13" width="120" height="44" rx="6" fill="#212337" stroke="#61afef" stroke-width="2"/>
+  <text x="70" y="40" text-anchor="middle" fill="#abb2bf" font-size="13" font-family="sans-serif">start</text>
+  <line x1="130" y1="35" x2="166" y2="35" stroke="#56b6c2" stroke-width="2" marker-end="url(#arr)"/>
+  <rect x="170" y="13" width="120" height="44" rx="6" fill="#1a2e29" stroke="#98c379" stroke-width="2"/>
+  <text x="230" y="40" text-anchor="middle" fill="#abb2bf" font-size="13" font-family="sans-serif">output</text>
+</svg>
 </whiteboard>
 ```
 
-- `type`: `mermaid` / `plantuml` / `svg` / `blank`
-- Simple diagrams: embed mermaid directly
-- Complex diagrams: use `type="blank"` to create an empty whiteboard, then call the `lark-whiteboard` skill
+- `type`: `mermaid` / `svg` / `blank` (avoid `plantuml` — Feishu parse failure)
+- Simple diagrams without custom colors: `mermaid` inline
+- Colored diagrams: `svg` inline with One Dark palette (see `whiteboard-rules.md` for full color scheme)
 
 See `whiteboard-rules.md` for full strategy.
 
