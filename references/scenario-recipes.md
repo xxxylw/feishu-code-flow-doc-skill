@@ -49,6 +49,16 @@ Recipes are "suggested combinations", not mandatory templates. The AI still inde
 - "Why" is one sentence, not expanded
 - Version baseline comes after the step log as an environment snapshot
 
+**Real-usage insights (build records)**:
+- The step log's "Why" must be one SHORT sentence in plain engineering prose, not a paragraph. Reject academic register.
+- Strip all environment-specific details (platform names, disk sizes, absolute paths in prose) — keep paths ONLY inside code blocks.
+- Strip all non-technical framing (interview prep, resume language) — keep technical documents focused on technical substance.
+- When an external reviewer rewrites docs, it tends toward academic tone. Always verify register and convert back to plain engineering prose if needed.
+- "Known gaps" or "MVP limitations" belong in the Risks brick (as Verified/Unverified items), NOT in a separate callout.
+- The Comparison table brick is excellent for "before vs after fix" narratives.
+- RL/training build records benefit from a "debugging chain" narrative — show the iteration history (what failed in v1, root cause, what changed in v2) in a table, not just the final config.
+- For training records, distinguish nvidia-smi vs PyTorch peak memory: nvidia-smi 30s sampling misses spikes; `torch.cuda.max_memory_allocated` is the reliable metric.
+
 ---
 
 ## Recipe 3: Training Journal
@@ -80,9 +90,10 @@ Recipes are "suggested combinations", not mandatory templates. The AI still inde
 
 1. One-line conclusion (what problem this algorithm/concept solves)
 2. Math derivation (intuition first, then derivation, each step with "why")
-3. Code evidence (if an implementation exists)
-4. Flow whiteboard (only when algorithm steps have branches or state transitions)
-5. Risks & unverified (label which parts are Inferred)
+3. Worked example (if the algorithm has a concrete numerical instance worth tracing)
+4. Code evidence (if an implementation exists)
+5. Flow whiteboard (only when algorithm steps have branches or state transitions)
+6. Risks & unverified (label which parts are Inferred)
 
 **Special notes**:
 - Math derivation must have prose bridging between formulas — no formula walls

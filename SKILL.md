@@ -34,7 +34,7 @@ Requires a prior explicit agreement in the session that the Feishu document is t
 
 ---
 
-## Brick List (11)
+## Brick List (12)
 
 | # | Brick | Trigger feature |
 |---|-------|-----------------|
@@ -49,6 +49,7 @@ Requires a prior explicit agreement in the session that the Feishu document is t
 | 9 | Version baseline | Environment / dependency versions |
 | 10 | Risks & unverified | Inferences / assumptions / unverified claims / missing dependencies |
 | 11 | Action items | Next steps with owners and acceptance criteria |
+| 12 | Worked example | Concrete numerical walkthrough with actual numbers plugged in |
 
 Full specifications in [`references/doc-bricks.md`](references/doc-bricks.md).
 
@@ -63,6 +64,7 @@ References file/function/class?           → +Code evidence
 Reproducible command/config/UI sequence?  → +Step log
 "Choose X over Y / change A to B"?        → +Decision table
 Formula / loss / gradient / derivation?   → +Math derivation
+Concrete numbers plugged into a formula?  → +Worked example
 Execution/data/call flow or architecture? → +Flow whiteboard
 CUDA/Python/package versions?             → +Version baseline
 Multi-object comparison (not selection)?  → +Comparison table
@@ -73,6 +75,8 @@ Hardware/path/project/date (≥2)?          → +Metadata header
 ```
 
 **Feature-driven, not scenario-driven**: only check whether the conversation contains the corresponding feature. The same "training record" may or may not contain math depending on actual content.
+
+**Split build records from concept notes**: when a conversation contains both reproducible operations (commands, configs, results) AND Q&A-style explanations ("why this parameter", "what does this concept mean"), produce TWO documents — a build record (step log + decision table + version baseline) and a separate concept notes document (flow whiteboard + math derivation + code evidence). Mixing them in one doc makes the build record too long and the explanations too sparse.
 
 **Fallback**: if nothing hits besides "One-line conclusion", the conversation is insufficient to summarize. Return to the user and suggest a more specific output.
 
@@ -89,7 +93,7 @@ Fixed pyramid order:
 2. One-line conclusion (always)
 3. Flow whiteboard (if hit; placed early to anchor the reader's mental model)
 4. Core bricks (in the conversation's logical order):
-   Decision table / Step log / Code evidence / Math derivation
+   Decision table / Step log / Code evidence / Math derivation / Worked example
 5. Reference bricks (static reference data):
    Version baseline / Comparison table
 6. Action items (if hit)
@@ -111,12 +115,23 @@ Typical brick combinations for common scenarios. These provide weighted confirma
 |----------|----------|-------------------|
 | Code flow doc | "explain how code runs" | Header + conclusion + whiteboard + code evidence (runtime order) + risks |
 | Build record | "record setup" | Header + conclusion + whiteboard (if complex) + decision table + step log + version baseline + risks |
-| Study notes | "study notes" "summarize paper" | Conclusion + math derivation + code evidence (if any) + whiteboard (if complex) + risks |
+| Study notes | "study notes" "summarize paper" | Conclusion + math derivation + worked example (if any) + code evidence (if any) + whiteboard (if complex) + risks |
 | Tech decision | "decision discussion" | Conclusion + decision table + whiteboard (architecture) + comparison table + action items + risks |
 | Meeting notes | "meeting summary" | Conclusion + decision table + action items + risks |
 | Troubleshooting | "debug recap" "postmortem" | Conclusion + step log + code evidence (error location) + decision table (fix candidates) + risks |
 
 Details in [`references/scenario-recipes.md`](references/scenario-recipes.md).
+
+---
+
+## Document splitting: build records vs concept notes
+
+When a project has both **operational steps** (what was done, with commands and data) AND **conceptual explanations** (why an approach works, with diagrams and derivations), split into two documents:
+
+- **Build Record** (primary): Step log + decision table + version baseline + risks. Pure facts and numbers. No concept explanations.
+- **Concept Notes** (secondary): Flow whiteboard + math derivation + code evidence + comparison table. Explains *why* things work, with diagrams.
+
+**Why split**: Build records are consulted for "what version / what command / what result". Concept notes are consulted for "why does this work / how does this algorithm behave". Mixing both in one document makes neither purpose clean.
 
 ---
 
@@ -157,7 +172,7 @@ Feishu XML syntax and command reference in [`references/feishu-elements.md`](ref
 2. **Review conversation**: scan content features, determine which bricks hit
 3. **Select bricks**: stack bricks per the feature checklist
 4. **Order**: arrange bricks per assembly order
-5. **Read references**: for hit bricks, read the corresponding section in `doc-bricks.md`; for whiteboards, read `whiteboard-rules.md`; check `style-guide.md` for style
+5. **Read references**: for hit bricks, read the corresponding section in `doc-bricks.md`; for whiteboards, read `whiteboard-rules.md`; check `style-guide.md` for style (including § Worked Examples if the document traces a numerical calculation)
 6. **Generate XML**: use correct syntax from `feishu-elements.md`
 7. **Write to Feishu**: create or update the document via lark-cli
 8. **Verify**: fetch written fragments, check title, whiteboard, code blocks, tables, and CJK text are correct
@@ -170,6 +185,6 @@ Feishu XML syntax and command reference in [`references/feishu-elements.md`](ref
 |------|----------------|
 | [`references/doc-bricks.md`](references/doc-bricks.md) | Full specifications for all 11 bricks (trigger / content / Feishu element / good-bad examples) |
 | [`references/whiteboard-rules.md`](references/whiteboard-rules.md) | Whiteboard strategy (three-tier judgement + type selection + fallback path) |
-| [`references/style-guide.md`](references/style-guide.md) | Style rules (syntax / anti-patterns / callout discipline / CJK-English mixing) |
+| [`references/style-guide.md`](references/style-guide.md) | Style rules (syntax / anti-patterns / callout discipline / CJK-English mixing / worked examples) |
 | [`references/scenario-recipes.md`](references/scenario-recipes.md) | Scenario recipes (typical brick combinations) |
 | [`references/feishu-elements.md`](references/feishu-elements.md) | Feishu XML reference + UTF-8 write safety |

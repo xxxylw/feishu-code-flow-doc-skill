@@ -17,8 +17,8 @@ Each brick defines: trigger condition, content requirements, Feishu element, and
 Good:
 ```xml
 <callout emoji="📌" background-color="light-blue" border-color="blue">
-<p>Project: DocMind P2 SFT / Hardware: 4090 24G / Date: 2026-06-21</p>
-<p>Path: /data/docmind/p2</p>
+<p>Project: Model Fine-tuning / Hardware: 4090 24G / Date: 2026-06-21</p>
+<p>Path: /data/project/run1</p>
 </callout>
 ```
 
@@ -43,7 +43,7 @@ Bad (treating the callout as a summary with filler):
 Good:
 ```xml
 <callout emoji="✅" background-color="light-green" border-color="green">
-<p>P2 SFT first convergence: loss 0.42, trainable 16.52M (0.679%), 4h12m.</p>
+<p>SFT first convergence: loss 0.42, trainable 16.52M (0.679%), 4h12m.</p>
 </callout>
 ```
 
@@ -386,4 +386,55 @@ Bad (no executable definition):
 <tr><td>continue optimizing</td><td>TBD</td></tr>
 </tbody>
 </table>
+```
+
+---
+
+## 12. Worked Example
+
+**Trigger**: the document walks through a concrete calculation with actual numbers plugged in — e.g. "compute GAE for one episode", "trace one sample through the reward function", "show how loss changes across three training steps". This is distinct from Math Derivation (brick 7): Math Derivation is symbolic/abstract; Worked Example is numerical/specific.
+
+**Content**: four parts, in order.
+
+1. **Setup paragraph**: state parameters and input data once, upfront. Compute intermediate quantities here and list their values inline. Do not re-derive them step-by-step — they are setup, not the point.
+2. **Main formula(s) as standalone blocks**: each principal formula (the recursion/iteration rule) gets its own block-level `<latex>`, bridged by one explanation sentence before the walkthrough.
+3. **Step-by-step walkthrough inside a `<blockquote>`**: one `<p>` per step. Each paragraph is one calculation (inline `<latex>`) plus one explanation sentence explaining WHY this result matters (a trend, a surprise, the mechanism), not just restating the number.
+4. **Optional result table AFTER the walkthrough**: only if later content needs to reference the values.
+
+**Rules**:
+- **No bullet lists in the walkthrough**: each step is its own `<p>`, optionally leading with a bold label.
+- **No code blocks for the main recursion**: the step-by-step must read as explanation, not a REPL transcript.
+- **Density**: compute derived inputs once in prose; spend the step budget on the main recursion, one explanation sentence per step.
+
+**Relationship to Math Derivation**: they are complementary. Math Derivation gives the formula; Worked Example plugs in numbers. A document can have one without the other. When both hit, Math Derivation comes first.
+
+**Feishu element**: `<blockquote>` containing `<p>` paragraphs with inline `<latex>`. Standalone formulas use block-level `<p><latex></latex></p>` before the blockquote.
+
+Good:
+```xml
+<p>The TD error and GAE recursion are:</p>
+<p><latex>\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)</latex></p>
+<p><latex>\hat{A}_t = \delta_t + \gamma\lambda\hat{A}_{t+1}</latex></p>
+<p>With γ=0.99, we get δ₀=1.292, δ₁=0.690, δ₂=0.797, δ₃=-0.800. γλ=0.9405.</p>
+<blockquote>
+<p><b>t=3</b>  <latex>\hat{A}_3 = -0.800</latex></p>
+<p>Last step has no future reward, so advantage equals the TD error directly.</p>
+<p><b>t=2</b>  <latex>\hat{A}_2 = 0.797 + 0.9405 \times (-0.800) = 0.045</latex></p>
+<p>Current δ is positive, but gets pulled back by the next step's negative advantage, nearly zeroing out.</p>
+<p><b>t=1</b>  <latex>\hat{A}_1 = 0.690 + 0.9405 \times 0.045 = 0.732</latex></p>
+<p>Next-step advantage is near zero, so this is basically just the current δ.</p>
+<p><b>t=0</b>  <latex>\hat{A}_0 = 1.292 + 0.9405 \times 0.732 = 1.980</latex></p>
+<p>Positive signal accumulates along the trajectory, growing larger toward earlier steps.</p>
+</blockquote>
+```
+
+Bad (formula wall, no explanation, code block instead of prose):
+```xml
+<p>δ₀ = 1.292, δ₁ = 0.690, δ₂ = 0.797, δ₃ = -0.800</p>
+<pre lang="text"><code>
+Â₃ = -0.800
+Â₂ = 0.797 + 0.9405×(-0.800) = 0.045
+Â₁ = 0.690 + 0.9405×0.045 = 0.732
+Â₀ = 1.292 + 0.9405×0.732 = 1.980
+</code></pre>
 ```

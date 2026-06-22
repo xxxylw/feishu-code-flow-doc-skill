@@ -28,17 +28,11 @@ Substitute: state facts and numbers directly.
 
 Prohibited: "very", "extremely", "significant", "greatly" — unless immediately followed by a specific number.
 
-- ✗ "training effect improved significantly"
-- ✓ "loss dropped from 0.68 to 0.42"
-
 ### Trivia logging
 
 Do not write: clearing temp files, renaming files, tweaking editor config, mood/reflections/"lessons learned".
 
 Do write: facts that affect subsequent behavior.
-
-- ✓ "Deleted model_v2 because it was merged into v3"
-- ✗ "Cleaned up a bit today"
 
 Judgment principle: would a future reader trying to reproduce or troubleshoot get stuck without this line? If yes, write it.
 
@@ -56,19 +50,18 @@ Judgment principle: would a future reader trying to reproduce or troubleshoot ge
 | Yellow | Warning / side-effect | As needed, 0-1 |
 | Red | Blocker / known issue | As needed, 0-1 |
 
-- The total cap (≤2) takes priority over individual color limits. If the metadata header (blue) + one-line conclusion (green) already use 2, yellow/red should only replace one of them when there is a genuine blocker or warning — not for decoration.
-- The "why" in a step log is a normal paragraph, not a callout
-- Do not use callouts for decoration ("this section is interesting")
-- Do not use callouts as summaries
+- The total cap (≤2) takes priority over individual color limits.
+- The "why" in a step log is a normal paragraph, not a callout.
+- Do not use callouts for decoration or summaries.
 
 ---
 
 ## Required Elements
 
 - **Numbers + units**: required when the content involves performance, time, VRAM, parameter count, or version numbers. Not required for pure concept notes or meeting minutes.
-- **Status labels**: Verified / Inferred / Unverified, when the content involves code behavior or verification status
-- **Reasons**: decisions, changes, and parameter choices must include a one-sentence "why"
-- **Evidence pointers**: cite code as `file.cpp::Class.method`, not "in some file"
+- **Status labels**: Verified / Inferred / Unverified, when the content involves code behavior or verification status.
+- **Reasons**: decisions, changes, and parameter choices must include a one-sentence "why".
+- **Evidence pointers**: cite code as `file.cpp::Class.method`, not "in some file".
 
 ---
 
@@ -89,3 +82,4 @@ This section applies when the document content is primarily Chinese (the common 
 - No scattered "next steps" in the body text — when next steps are needed, consolidate them into the Action Items brick or the Risks brick's verification method
 - No fabricated dialogue (do not invent arguments that did not happen)
 - No speculation beyond what the current session has confirmed (speculation must be labeled Inferred)
+- No non-technical framing (interview prep, resume language, etc.) — keep technical documents focused on technical substance
