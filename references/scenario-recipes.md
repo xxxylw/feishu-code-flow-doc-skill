@@ -58,6 +58,7 @@ Recipes are "suggested combinations", not mandatory templates. The AI still inde
 - The Comparison table brick is excellent for "before vs after fix" narratives.
 - RL/training build records benefit from a "debugging chain" narrative — show the iteration history (what failed in v1, root cause, what changed in v2) in a table, not just the final config.
 - For training records, distinguish nvidia-smi vs PyTorch peak memory: nvidia-smi 30s sampling misses spikes; `torch.cuda.max_memory_allocated` is the reliable metric.
+- **Concept explanations do NOT belong in build records.** When the user asks "why does X work" or an external reviewer adds detailed concept explanations (e.g. "first principles", "paradigm"), these should be split into a separate Concept Notes document (flow whiteboard + math derivation + code evidence), not mixed into the step log. Build records are consulted for "what command / what result"; concept notes are consulted for "why does this work".
 
 ---
 
@@ -98,7 +99,7 @@ Recipes are "suggested combinations", not mandatory templates. The AI still inde
 **Special notes**:
 - Math derivation must have prose bridging between formulas — no formula walls
 - Write the intuitive explanation first (plain language), then the formal derivation
-- Common mistakes may use a yellow callout (respect the ≤2 callout limit)
+- Common mistakes may use a yellow callout
 
 ---
 

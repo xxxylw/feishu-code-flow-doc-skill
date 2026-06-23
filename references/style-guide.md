@@ -37,22 +37,20 @@ Do write: facts that affect subsequent behavior.
 Judgment principle: would a future reader trying to reproduce or troubleshoot get stuck without this line? If yes, write it.
 
 ---
-
 ## Callout Discipline
 
-- **At most 2 per document**
-- Color semantics are fixed:
+Color semantics are fixed:
 
-| Color | Meaning | Limit |
-|-------|---------|-------|
-| Blue | Title block / project anchor | ≤1 |
-| Green | Locked conclusion / milestone | ≤1 |
-| Yellow | Warning / side-effect | As needed, 0-1 |
-| Red | Blocker / known issue | As needed, 0-1 |
+| Color | Meaning |
+|-------|---------|
+| Blue | Convention / rule / definition / project anchor |
+| Green | Locked conclusion / milestone |
+| Yellow | Warning / side-effect |
+| Red | Blocker / known issue |
 
-- The total cap (≤2) takes priority over individual color limits.
-- The "why" in a step log is a normal paragraph, not a callout.
-- Do not use callouts for decoration or summaries.
+Callouts are for emphasis that genuinely benefits from a visual container — conclusions, warnings, project anchors, reusable rules. Do not deliberately ration them; if a document needs 4 callouts because there are 4 items worth emphasizing, use 4.
+
+The "why" in a step log is always a normal paragraph, not a callout. Do not use callouts for decoration or filler summaries.
 
 ---
 
@@ -73,6 +71,20 @@ This section applies when the document content is primarily Chinese (the common 
 - Paths, file names, and commands stay in English
 - Descriptive prose is in Chinese
 - Do not force-translate established English terms (write "BatchNorm", not "批归一化")
+
+---
+
+## Tables vs Lists
+
+Tables and lists are both ways to present a set of structured items. Choose based on data shape, not habit.
+
+**Use a table when** each item has multiple attributes that need to be compared side by side — i.e., the content is two-dimensional (rows × columns). Examples: version comparison across components, hyperparameter before/after, decision candidates with metrics.
+
+**Use a list when** the content is one-dimensional — a sequence of steps, a collection of properties, or a set of rules. Examples: node label conventions, construction rules, setup steps, risks items.
+
+**Decision rule**: if each item has only one value to state, use a list. If each item has two or more values that need to be scanned together, use a table. When unsure, try the list first — it is almost always more readable and takes less space.
+
+**Don't use a table to present a single column of values** — that is a list.
 
 ---
 
